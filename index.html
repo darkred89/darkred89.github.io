@@ -1,105 +1,30 @@
-<!doctype html>
-<html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity WebGL Player | Tanks</title>
-    <link rel="stylesheet" href="TemplateData/style.css">
-    <link rel="shortcut icon" href="TemplateData/favicon.ico" />
-    <script src="TemplateData/UnityProgress.js"></script>
-  </head>
-  <body class="template">
-    <p class="header"><span>Unity WebGL Player | </span>Tanks</p>
-    <div class="template-wrap clear">
-    <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" height="960px" width="1280px"></canvas>
-      <div class="logo"></div>
-      <div class="fullscreen"><img src="TemplateData/fullscreen.png" width="38" height="38" alt="Fullscreen" title="Fullscreen" onclick="SetFullscreen(1);" /></div>
-      <div class="title">Tanks</div>
-    </div>
-    <p class="footer">&laquo; created with <a href="http://unity3d.com/" title="Go to unity3d.com">Unity</a> &raquo;</p>
-    <script type='text/javascript'>
-  // connect to canvas
-  var Module = {
-    TOTAL_MEMORY: 268435456,
-    filePackagePrefixURL: "Release/",
-    memoryInitializerPrefixURL: "Release/",
-    preRun: [],
-    postRun: [],
-    print: (function() {
-      return function(text) {
-        console.log (text);
-      };
-    })(),
-    printErr: function(text) {
-      console.error (text);
-    },
-    canvas: document.getElementById('canvas'),
-    progress: null,
-    setStatus: function(text) {
-      if (this.progress == null) 
-      {
-        if (typeof UnityProgress != 'function')
-          return;
-        this.progress = new UnityProgress (canvas);
-      }
-      if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: '' };
-      if (text === Module.setStatus.text) return;
-      this.progress.SetMessage (text);
-      var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
-      if (m)
-        this.progress.SetProgress (parseInt(m[2])/parseInt(m[4]));
-      if (text === "") 
-        this.progress.Clear()
-    },
-    totalDependencies: 0,
-    monitorRunDependencies: function(left) {
-      this.totalDependencies = Math.max(this.totalDependencies, left);
-      Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
-    }
-  };
-  Module.setStatus('Downloading (0.0/1)');
-</script>
-<script src="Release/UnityConfig.js"></script>
-<script src="Release/fileloader.js"></script>
-<script>if (!(!Math.fround)) {
-  var script = document.createElement('script');
-  script.src = "Release/WebGl.js";
-  document.body.appendChild(script);
-} else {
-  var codeXHR = new XMLHttpRequest();
-  codeXHR.open('GET', 'Release/WebGl.js', true);
-  codeXHR.onload = function() {
-    var code = codeXHR.responseText;
-    if (!Math.fround) { 
-try {
-  console.log('optimizing out Math.fround calls');
-  var m = /var ([^=]+)=global\.Math\.fround;/.exec(code);
-  var minified = m[1];
-  if (!minified) throw 'fail';
-  var startAsm = code.indexOf('// EMSCRIPTEN_START_FUNCS');
-  var endAsm = code.indexOf('// EMSCRIPTEN_END_FUNCS');
-  var asm = code.substring(startAsm, endAsm);
-  do {
-    var moar = false; // we need to re-do, as x(x( will not be fixed
-    asm = asm.replace(new RegExp('[^a-zA-Z0-9\\$\\_]' + minified + '\\(', 'g'), function(s) { moar = true; return s[0] + '(' });
-  } while (moar);
-  code = code.substring(0, startAsm) + asm + code.substring(endAsm);
-  code = code.replace("'use asm'", "'almost asm'");
-} catch(e) { console.log('failed to optimize out Math.fround calls ' + e) }
- }
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="author" content="styledmenus.com" />
+<title>Games demo</title>
+<link href="style.css" rel="stylesheet" media="all" />
+</head>
+<body>
+<div id="menu">
+	<ul>
+		<li><a href="Index.html" class="current">home</a></li>
+		<li><a href="Games.html">games</a></li>
+		<li><a href="TechDemos.html">tech demos</a></li>
+		<li><a href="Contacts.html">contacts</a></l							
+	</ul>
+</div>
+<div id="content">
+	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean et est efficitur, faucibus ligula sit amet, ultricies metus. Vivamus tincidunt metus eget dolor ultricies scelerisque. Nunc pharetra, enim ultricies consequat finibus, lacus urna molestie arcu, eget mattis dolor ante eu ligula. Donec eu dictum risus, vel lobortis velit. Phasellus faucibus mollis rhoncus. Vestibulum et ligula quis orci cursus consequat ut eget lorem. Interdum et malesuada fames ac ante ipsum primis in faucibus. Quisque sollicitudin velit augue, in facilisis elit consectetur et. In a tellus ac urna pretium commodo sit amet at nisl. Nullam molestie neque risus, ac condimentum nunc porta non. Aliquam eu urna eget purus molestie tincidunt quis id sapien. Maecenas quis facilisis diam, eu tristique mauris. Nullam dictum mauris nulla, sed suscipit mi semper et. Suspendisse potenti. Nulla eu tellus nec leo consequat tristique. Sed tempor nisi quam, at tincidunt leo lacinia molestie.</p>
 
-    var blob = new Blob([code], { type: 'text/javascript' });
-    codeXHR = null;
-    var src = URL.createObjectURL(blob);
-    var script = document.createElement('script');
-    script.src = URL.createObjectURL(blob);
-    script.onload = function() {
-      URL.revokeObjectURL(script.src);
-    };
-    document.body.appendChild(script);
-  };
-  codeXHR.send(null);
-}
-</script>
-  </body>
+<p>Duis convallis arcu lectus, id mollis nulla malesuada vel. Mauris sit amet ipsum urna. Pellentesque consectetur convallis dolor et porttitor. Morbi leo dui, luctus ut felis vitae, mattis malesuada justo. Donec eu interdum magna. Integer lacinia tristique metus nec faucibus. Vivamus sit amet imperdiet lectus. Cras et tempus dolor. Donec fringilla elit non mauris efficitur laoreet. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin rhoncus aliquet finibus. In consequat turpis et risus feugiat, eget venenatis odio blandit. Pellentesque pulvinar nunc porttitor, fringilla urna condimentum, sodales urna. Suspendisse nec porta neque, a rutrum lectus.</p>
+
+<p>Cras varius nisi purus, non vulputate nisi dapibus vitae. Aenean tortor sem, feugiat quis dictum ac, tincidunt ac justo. In hac habitasse platea dictumst. Aliquam imperdiet nunc at est semper feugiat. Cras ac nulla gravida orci dapibus luctus quis et lectus. Nam euismod mauris accumsan metus sollicitudin vulputate. Aenean laoreet id felis sed efficitur. Vivamus porta ante mi, ut porta justo iaculis a. Praesent sit amet porttitor libero, in semper leo. Phasellus a dui erat. Nulla consequat eleifend magna nec mattis. Proin nec aliquam turpis. Pellentesque sit amet fermentum sem.</p>
+
+<p>Pellentesque massa elit, sollicitudin eu odio eu, auctor commodo sem. Integer nec molestie nunc. Etiam posuere, eros nec accumsan dictum, ante metus accumsan nisl, ac sodales elit justo rutrum turpis. Donec pretium, ex sit amet fermentum semper, libero odio mattis nunc, at ornare leo nisi a urna. Mauris auctor arcu non molestie auctor. Phasellus pretium cursus vestibulum. Proin eleifend nisi vel nibh blandit, fermentum scelerisque odio egestas. Integer bibendum nisi lorem, quis hendrerit felis suscipit quis. Etiam sed libero et ipsum tincidunt eleifend a fermentum risus. Integer sit amet ligula hendrerit, elementum dolor eu, tempus ligula. Aliquam non ultrices dolor. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec in lobortis metus. Donec rutrum erat vitae nunc faucibus, id gravida libero varius.</p>
+
+<p>Etiam dictum faucibus pharetra. Curabitur id consequat ipsum. Etiam ullamcorper in sem eu egestas. Nullam fermentum dignissim tortor, sed mollis dui posuere non. Fusce a enim vestibulum, dignissim orci eget, accumsan diam. Aenean nunc orci, suscipit eu ornare a, egestas vehicula nisi. Maecenas blandit pellentesque libero eu pretium. Nam a diam elit.</p>
+</div>
+</body>
 </html>

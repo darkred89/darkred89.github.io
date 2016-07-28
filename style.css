@@ -1,0 +1,90 @@
+/* --------------------------
+AUTHOR : STYLED MENUS
+URL : http://www.styledmenus.com
+Copyrights by STYLED MENUS
+----------------------------*/
+*{
+	margin:0;
+	padding:0;
+	
+}
+body{
+	background-color:black;
+	/*background:#fff;*/
+	color:#666;	
+	font:12px/18px Tahoma, Arial, Helvetica, sans-serif;	
+}
+
+table ,td{
+	padding:10px;
+}
+table {
+	border: 1px solid black;
+    /*border-collapse: collapse;*/
+    width: 100%;
+	text-align: center;
+}
+
+
+	#content{
+		background-color:#ABABAB;
+		width:616px;
+		margin:auto;
+		padding:20px;
+	}
+	
+	#imagelink{
+		border: 4px solid #ABABAB;
+		
+		
+	}
+	#imagelink:hover{
+			border: 4px solid #5995A8;
+		}
+
+	#menu{
+		
+		width:656px;
+		height:42px;
+		background:url(images/menu_025_bg.jpg) no-repeat;
+		margin:auto;
+		/*align:center;*/
+	}
+		#menu ul{
+			list-style:none;
+			text-align:center;
+		}
+			#menu li{
+				list-style:none;
+				display:inline;
+				margin:0 8px;
+			}
+				#menu li a{
+					color:#b19c93;
+					/*text-transform:uppercase;*/
+					font-size:11px;
+					font-weight:bold;
+					line-height:42px;
+					text-decoration:none;
+					padding:0 20px;
+					background:url(images/menu_025_h.jpg) no-repeat left center;			
+				}
+					#menu li a:hover{
+						color:#fff;
+						background:url(images/menu_025_c.jpg) no-repeat left center;
+					}
+				#menu li a.current{
+					background:url(images/menu_025_c.jpg) no-repeat left center;	
+					color:#fff;
+					text-transform:uppercase;
+					font-size:11px;
+					font-weight:bold;
+					line-height:42px;
+					text-decoration:none;
+					padding:0 20px;	
+				}
+					#menu li a:hover.current{
+						color:#fff;
+					}
+
+
