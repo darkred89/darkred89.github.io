@@ -14,6 +14,10 @@ var present;
 var keys;
 var seven;
 var dude;
+var leftArrow;
+var rightArrow;
+var unpressedArrowOpacity=0.1;
+var pressedArrowOpacity=0.3;
 
 var helloText;
 
@@ -59,13 +63,16 @@ function preload() {
     // Load our image assets
     //game.load.image('dude', 'img/dude.png');
     game.load.spritesheet('dude', 'img/dudeanim.png', 100, 100);
-    game.load.image('present','img/present.png')
+    game.load.image('present','img/present.png');
+    game.load.image('leftArrow','img/leftArrow.png');
+    game.load.image('rightArrow','img/rightArrow.png');
 }
 
-
- 
 // Called after preload
 function create() {
+    
+   CreateArrows();
+    
     
     input = document.createElement("input");
     input.type = "text";
@@ -87,11 +94,7 @@ function create() {
     
    
     
-     helloText = game.add.text(5, 5, '', { 
-        fontSize: '62px', 
-        fill: '#FFFFFF',
-         font: 'Pixel'
-    });
+     
     scoreText = game.add.text(700, 5, '', { 
         fontSize: '32px', 
         fill:'#FFFFFF',
@@ -126,12 +129,17 @@ function create() {
     
     
     
-     gameOverText = game.add.text(200, 200, '', { 
+     gameOverText = game.add.text(230, 130, '', { 
         fontSize: '64px', 
         fill: '#FFFFFF',
          font: 'Pixel'
     });
     
+    codeText = game.add.text(420, 180, '', { 
+        fontSize: '64px', 
+        fill: '#FFFFFF',
+         font: 'Pixel',
+    });
     
     helloBanner=game.add.text(220, 100, 'Введите 777 для начала игры:', { 
         fontSize: '32px', 
@@ -150,8 +158,21 @@ function create() {
     
 }
 
+function CreateArrows(){
+     
+    leftArrow=game.add.sprite(0, game.world.height, 'leftArrow');
+    leftArrow.anchor.set(0.5, 0.5);
+    leftArrow.x+=leftArrow.width/2;
+    leftArrow.y-=leftArrow.height/2;
+    leftArrow.alpha=unpressedArrowOpacity;
+    
+    rightArrow=game.add.sprite(game.world.width, game.world.height, 'rightArrow');
+    rightArrow.anchor.set(0.5, 0.5);
+    rightArrow.x-=leftArrow.width/2;
+    rightArrow.y-=leftArrow.height/2;
+    rightArrow.alpha=unpressedArrowOpacity;
+}
 
- 
 var counter=0;
 var levelCounter= 1;
 
@@ -192,15 +213,15 @@ function StartGame(){
     
     
     //if(input.value!='') gameOverText.text=input.value;
-    gameOverText.text=input.value;
+    codeText.text=input.value;
     
     
-    if(gameOverText.text=='777'){
+    if(codeText.text=='777'){
         if(Delay(30)){
             
             input.value='';
             input.disabled='disabled';
-        gameOverText.text='';
+        codeText.text='';
         helloBanner.text='';
         gameState=processGame;
         ActivatePresent(0);
@@ -222,7 +243,8 @@ function ProcessGame(){
             levelCounter++;
         }      
     }
-    
+    rightArrow.alpha=unpressedArrowOpacity;
+    leftArrow.alpha=unpressedArrowOpacity;
     MovePresents();
     
     GetKeyboarControls();
@@ -239,7 +261,7 @@ function EndGame(){
            
         gameOver=0;       
         gameState=startGame;
-        helloBanner.text='Ввеедите 777 для начала игры:';
+        helloBanner.text='Введите 777 для начала игры:';
         input.disabled='';
         totalScore=0;
         scoreText.text='';
@@ -368,12 +390,14 @@ function MovePresents(){
 
 function MoveLeft(){
     dude.x -= BeeLaga.velocity;
-        dude.animations.play('left');
+    dude.animations.play('left');
+    leftArrow.alpha=pressedArrowOpacity;
 }
 
 function MoveRight(){
     dude.x += BeeLaga.velocity;
-        dude.animations.play('right');
+    dude.animations.play('right');
+    rightArrow.alpha=pressedArrowOpacity;
 }
 
 function CollisionCheck(i){
