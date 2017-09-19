@@ -89,12 +89,12 @@ function create() {
     
      helloText = game.add.text(5, 5, '', { 
         fontSize: '62px', 
-        fill: beelineOrange,
+        fill: '#FFFFFF',
          font: 'Pixel'
     });
     scoreText = game.add.text(700, 5, '', { 
         fontSize: '32px', 
-        fill: beelineOrange,
+        fill:'#FFFFFF',
          font: 'Pixel'
     });
     
@@ -128,14 +128,14 @@ function create() {
     
      gameOverText = game.add.text(200, 200, '', { 
         fontSize: '64px', 
-        fill: beelineOrange,
+        fill: '#FFFFFF',
          font: 'Pixel'
     });
     
     
     helloBanner=game.add.text(220, 100, 'Введите 777 для начала игры:', { 
         fontSize: '32px', 
-        fill: beelineOrange,
+        fill: '#FFFFFF',
          font: 'Pixel'
     });
     
