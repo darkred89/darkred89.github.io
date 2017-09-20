@@ -3,6 +3,7 @@ var BeeLaga = {
     velocity: 10,
     gravity: 5,
     nextPresentTimeout: 100,
+    finalWaveTImeout: 300,
     maxPresents: 20,
     tilesize: 100
     
@@ -25,6 +26,9 @@ var leftArrow;
 var rightArrow;
 var unpressedArrowOpacity=0.1;
 var pressedArrowOpacity=0.3;
+
+var emitter;
+var front_emitter;
 
 var helloText;
 
@@ -67,7 +71,11 @@ var game = new Phaser.Game(1000, 500, Phaser.AUTO, 'area', {
     update: update
 });
 
- 
+//Just testing callbacks
+function onFocus(){
+    if(debug) console.log("Focus");
+}
+
 // Called first
 function preload() {
     // Load our image assets
@@ -78,12 +86,33 @@ function preload() {
     game.load.image('present','img/present.png');
     game.load.image('leftArrow','img/leftArrow.png');
     game.load.image('rightArrow','img/rightArrow.png');
+    
+     game.load.image('star','img/star.png');
 }
 
 // Called after preload
 function create() {
     
-   CreateArrows();
+    //	Emitters have a center point and a width/height, which extends from their center point to the left/right and up/down
+    front_emitter = game.add.emitter(game.world.centerX, -32, 50);
+    front_emitter.makeParticles('star');
+    front_emitter.maxParticleScale = 0.8;
+    front_emitter.minParticleScale = 0.1;
+    front_emitter.setYSpeed(500,500);
+    front_emitter.setXSpeed(0,0);
+    front_emitter.gravity = 0;
+    front_emitter.width = game.world.width * 1.5;
+   front_emitter.minRotation = 0;
+   front_emitter.maxRotation = 0;
+   
+    front_emitter.start(false, 1200, 100);
+    front_emitter.on=false;
+    //emitter.emitX = 500;
+    //game.add.tween(emitter).to( { emitX: 800 }, 2000, Phaser.Easing.Linear.None, true, 0, Number.MAX_VALUE, true);
+    
+    game.onFocus.add(onFocus, this);
+    
+    CreateArrows();
     
     
     input = document.createElement("input");
@@ -128,9 +157,6 @@ function create() {
     }
     
     
-    //SetCentrPosition(present);
-    
-    
     // Add the dude to the middle of the game area
     dude = game.add.sprite(game.world.centerX, game.world.centerY+game.height/2, 'dude');
     dude.anchor.set(0.5, 0.5);  
@@ -157,18 +183,21 @@ function create() {
          font: 'Pixel'
     });
     
-    codeText = game.add.text(420, 180, '', { 
+    codeText = game.add.text(0, 180, '', { 
         fontSize: '64px', 
         fill: '#FFFFFF',
          font: 'Pixel',
+        boundsAlignH: "center"
     });
+     codeText.setTextBounds(0, 0, 1000, 100);
     
-    helloBanner=game.add.text(220, 100, 'Введите 777 для начала игры:', { 
+    helloBanner=game.add.text(0, 100, 'Введите 777 для начала игры:', { 
         fontSize: '32px', 
         fill: '#FFFFFF',
-         font: 'Pixel'
+         font: 'Pixel',
+         boundsAlignH: "center"        
     });
-    
+    helloBanner.setTextBounds(0, 0, 1000, 100);
     
      seven.onDown.add(function(){
         PrintSeven();
@@ -180,6 +209,7 @@ function create() {
     
 }
 
+//Create graphical arrows, which lights when it is movement
 function CreateArrows(){
      
     leftArrow=game.add.sprite(0, game.world.height, 'leftArrow');
@@ -196,7 +226,7 @@ function CreateArrows(){
 }
 
 var counter=0;
-var levelCounter= 1;
+var levelCounter= 0;
 
 // Called once every frame, ideally 60 times per second
 function update() {
@@ -234,8 +264,7 @@ function update() {
     
 }
 
-//Game Processes
-
+//Blinks with his eyes by timer
 function Blink(){
     eyes.alpha=Math.abs(eyes.alpha-1);
     if(eyes.alpha==0){
@@ -243,12 +272,14 @@ function Blink(){
         nextBlinkTime=blinkInterval+getRandomInt(-100,200);
     }
 }
-
+//funct eyes to follow the body
+//TODO make them a GROUP
 function EyesFollow(){
     eyes.x=dude.x;
     eyes.y=dude.y;
 }
 
+//Game Processes
 function StartGame(){
     
    
@@ -269,8 +300,11 @@ function StartGame(){
         codeText.text='';
         helloBanner.text='';
         gameState=processGame;
-        ActivatePresent(0);
+        StartWithLevel(3);
+            
         scoreText.text='';
+            
+        front_emitter.on=true;
         }
     }
     
@@ -281,17 +315,21 @@ function ProcessGame(){
     counter++;
     if(counter>=BeeLaga.nextPresentTimeout+getRandomInt(0,100)){
          counter=0;
-        //ActivatePresent(0); // - НЕ ПАШЕТ
-        SetRandomPos(levelCounter);
-        activeIndexes[levelCounter]=1;
+        //SetRandomPos(levelCounter);
+       // activeIndexes[levelCounter]=1;
+       
         if(levelCounter<BeeLaga.maxPresents){
             //helloText.text=levelCounter;
             levelCounter++;
-            if(debug) scoreText.text=levelCounter;
+             ActivatePresent(levelCounter);
+            if(levelCounter==BeeLaga.maxPresents-1) {
+                BeeLaga.nextPresentTimeout+=BeeLaga.finalWaveTImeout+getRandomInt(-100,200);
+            }
         }
         else{
             AllighPresentsForFinalWave();
             gameState=finalRound;
+            RemoveUpperPresents();
         }
     }
     rightArrow.alpha=unpressedArrowOpacity;
@@ -303,16 +341,11 @@ function ProcessGame(){
     lockDude();
 }
 
-
 function FinalRound(){
-    
-    
-    
-    
     rightArrow.alpha=unpressedArrowOpacity;
     leftArrow.alpha=unpressedArrowOpacity;
     
-     MovePresents();
+    MovePresents();
     
     GetKeyboarControls();
     GetTouchControl();
@@ -345,16 +378,35 @@ function EndGame(){
     }
 }
 
+//REmoves active presents for final wave, which are not on screen right now
+function RemoveUpperPresents(){
+    for(var i=0; i<BeeLaga.maxPresents;i++){
+        if(present[i].y<0) activeIndexes[i]=0;
+    }
+}
+
+//Sets starting level
+function StartWithLevel(levelIndex){
+    for(var i=0; i<levelIndex;i++){
+        ActivatePresent(i);
+        //SetRandomPos(i);
+    }
+    levelCounter=levelIndex;
+}
+
+//Focus on the specific document <div>
 function Focus(){
      var element = document.getElementById("focusId");
         alignWithTop = true;
         //helloBanner.text=element.value;
         element.scrollIntoView(alignWithTop);
 }
+//For smartphone input, we had to place inputbox, make it transparent
 function InputFocus(){
     input.focus();
 }
 
+//Old function, was  before inputbox
 function PrintSeven(){
     
     //Changed logic to input focus
@@ -394,6 +446,7 @@ function GetTouchControl(){
         }    
     }
 }
+//prevent dude from getting out of the borders
 function lockDude(){
     // Prevent dude from escaping outside the stage's boundaries
     var halfWidth = dude.width / 2;
@@ -426,11 +479,6 @@ function  CreatePresent(){
     return object;
 }
 
-function SetCentrPosition(object){
-    object.x=game.world.centerX;
-    object.y=100;
-}
-
 function SetRandomPos(object){
     object.x= getRandomInt(0,10)*BeeLaga.tilesize+BeeLaga.tilesize/2;
     object.y= -100-getRandomInt(20, 1000);
@@ -445,10 +493,16 @@ function AllighPresentsForFinalWave(){
 }
 
 function MoveAway(object){
-    object.x= -100;
-    object.y=-100;
+    object.x=0;
+    object.y=-200;
 }
+
 //-----------------------
+
+function SetCentrPosition(object){
+    object.x=game.world.centerX;
+    object.y=100;
+}
 
 //Двигает активные подарки
 function MovePresents(){
@@ -457,27 +511,28 @@ function MovePresents(){
             present[i].y+=BeeLaga.gravity;
             CollisionCheck(i);
             if( present[i].y>game.height+100){
-                
+               if(debug) console.log("Index "+i);
+                MoveAway(present[i]);
                 PresentFallCallback(i);
             }
         }
     } 
 }
 
+//Our movement
 function MoveLeft(){
     dude.x -= BeeLaga.velocity;
     dude.animations.play('left');
     leftArrow.alpha=pressedArrowOpacity;
     EyesFollow();
 }
-
 function MoveRight(){
     dude.x += BeeLaga.velocity;
     dude.animations.play('right');
     rightArrow.alpha=pressedArrowOpacity;
     EyesFollow();
 }
-
+//
 function CollisionCheck(i){
     if(Math.abs(present[i].x-dude.x)<=collidePadding && Math.abs(present[i].y-dude.y)<collidePadding){
         collidedIndex=i;
@@ -491,7 +546,7 @@ function GameOver(){
     gameOverText.text="ОТ ПОДАРКА НЕ\r\nУБЕЖИШЬ!";
     dude.animations.play('death');
     
-    
+    front_emitter.on=false;
     gameState=endGame;
 }
 
@@ -501,12 +556,14 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
+//Calls when present leaves canvas
 function PresentFallCallback(index){
     if(gameState==processGame){
            SetRandomPos(present[index]);
     }
     else{
-        MoveAway(present[index]);
+
+        activeIndexes[index]=0;
     }
     dude.animations.play('joy');
     totalScore+=scoreIncrease;
@@ -526,6 +583,7 @@ function shuffle(a) {
     }
 }
 
+//Returns true after delay
 var delay=0;
 function Delay(ticks){
     delay++;
@@ -536,6 +594,7 @@ function Delay(ticks){
     return false;
 }
 
+//animation for GameOver
 var animCounter=0;
 function AnimateGameOver(){
     animCounter++;
