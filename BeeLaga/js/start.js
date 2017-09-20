@@ -2,18 +2,25 @@
 var BeeLaga = {
     velocity: 10,
     gravity: 5,
-    nextPresentTimeout: 150,
+    nextPresentTimeout: 100,
     maxPresents: 20,
     tilesize: 100
     
 };
 
-var activeIndexes = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+var activeIndexes = [0,0,0,0,0,0,0,0,0,0,
+                     0,0,0,0,0,0,0,0,0,0,
+                     0,0,0,0,0,0,0,0,0,0];
 var collidedIndex;
 var present;
+var finalPresents;
 var keys;
 var seven;
 var dude;
+var eyes;
+var blinkInterval=200;
+var nextBlinkTime=blinkInterval;
+var blinkCounter=0;
 var leftArrow;
 var rightArrow;
 var unpressedArrowOpacity=0.1;
@@ -44,11 +51,14 @@ var gameState=0;
 var startGame=0;
 var processGame=1;
 var endGame=2;
+var finalRound=3;
 var firstStart=true;
 
 //colors
 var beelineOrange='#ffb612';
 var beelineDarkGrey='#665546';
+
+var debug=false;
 
 // Create a new Phaser game object with a single state that has 3 functions
 var game = new Phaser.Game(1000, 500, Phaser.AUTO, 'area', {
@@ -63,6 +73,8 @@ function preload() {
     // Load our image assets
     //game.load.image('dude', 'img/dude.png');
     game.load.spritesheet('dude', 'img/dudeanim.png', 100, 100);
+    game.load.image('eyes','img/dudeEyes.png');
+    
     game.load.image('present','img/present.png');
     game.load.image('leftArrow','img/leftArrow.png');
     game.load.image('rightArrow','img/rightArrow.png');
@@ -103,9 +115,15 @@ function create() {
     
     
    
-    present=[CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent()];
+    present=[CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),
+             CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),
+             CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),
+             CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),
+             CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),
+             CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),CreatePresent(),
+            ];
     
-    for(var i=0; i<BeeLaga.maxPresents; i++){
+    for(var i=0; i<BeeLaga.maxPresents+10; i++){
        MoveAway(present[i]);
     }
     
@@ -122,6 +140,10 @@ function create() {
     dude.animations.add('right',[3],0,false);
     dude.animations.add('joy',[0,1],10,false);
     dude.animations.add('death',[0,1,0,1],15,true);
+    
+    eyes=game.add.sprite(game.world.centerX, game.world.centerY+game.height/2, 'eyes');
+    eyes.anchor.set(0.5, 0.5);  
+    eyes.alpha=0;
     
     // Add key input to the game
     keys = game.input.keyboard.createCursorKeys();
@@ -196,13 +218,36 @@ function update() {
         case endGame:
             EndGame();
             break;
+        case finalRound:
+            FinalRound()
+            break;
             
                     }
        
+    blinkCounter++;
+    
+    if(blinkCounter>=nextBlinkTime){
+        nextBlinkTime+=10;
+        Blink();
+    }
+    
     
 }
 
 //Game Processes
+
+function Blink(){
+    eyes.alpha=Math.abs(eyes.alpha-1);
+    if(eyes.alpha==0){
+        blinkCounter=0;
+        nextBlinkTime=blinkInterval+getRandomInt(-100,200);
+    }
+}
+
+function EyesFollow(){
+    eyes.x=dude.x;
+    eyes.y=dude.y;
+}
 
 function StartGame(){
     
@@ -225,6 +270,7 @@ function StartGame(){
         helloBanner.text='';
         gameState=processGame;
         ActivatePresent(0);
+        scoreText.text='';
         }
     }
     
@@ -233,7 +279,7 @@ function StartGame(){
 function ProcessGame(){
      //Next Level Logic
     counter++;
-    if(counter>=BeeLaga.nextPresentTimeout){
+    if(counter>=BeeLaga.nextPresentTimeout+getRandomInt(0,100)){
          counter=0;
         //ActivatePresent(0); // - НЕ ПАШЕТ
         SetRandomPos(levelCounter);
@@ -241,11 +287,32 @@ function ProcessGame(){
         if(levelCounter<BeeLaga.maxPresents){
             //helloText.text=levelCounter;
             levelCounter++;
-        }      
+            if(debug) scoreText.text=levelCounter;
+        }
+        else{
+            AllighPresentsForFinalWave();
+            gameState=finalRound;
+        }
     }
     rightArrow.alpha=unpressedArrowOpacity;
     leftArrow.alpha=unpressedArrowOpacity;
     MovePresents();
+    
+    GetKeyboarControls();
+    GetTouchControl();
+    lockDude();
+}
+
+
+function FinalRound(){
+    
+    
+    
+    
+    rightArrow.alpha=unpressedArrowOpacity;
+    leftArrow.alpha=unpressedArrowOpacity;
+    
+     MovePresents();
     
     GetKeyboarControls();
     GetTouchControl();
@@ -264,8 +331,8 @@ function EndGame(){
         helloBanner.text='Введите 777 для начала игры:';
         input.disabled='';
         totalScore=0;
-        scoreText.text='';
-        for(var i=0; i<BeeLaga.maxPresents; i++){
+        
+        for(var i=0; i<BeeLaga.maxPresents+10; i++){
         MoveAway(present[i]);
         activeIndexes[i]=0;
         
@@ -342,7 +409,8 @@ function lockDude(){
     }
     if ((dude.y + halfHeight) > game.height) {
         dude.y = game.height - halfHeight;
-    }   
+    } 
+    EyesFollow();
 }
 
 // Present stuff---------
@@ -368,6 +436,14 @@ function SetRandomPos(object){
     object.y= -100-getRandomInt(20, 1000);
 }
 
+function AllighPresentsForFinalWave(){
+    for(var i=BeeLaga.maxPresents; i<BeeLaga.maxPresents+10; i++){
+        present[i].x=(i-BeeLaga.maxPresents)*BeeLaga.tilesize+BeeLaga.tilesize/2;
+        present[i].y= -100;
+        activeIndexes[i]=1;
+    }
+}
+
 function MoveAway(object){
     object.x= -100;
     object.y=-100;
@@ -376,13 +452,13 @@ function MoveAway(object){
 
 //Двигает активные подарки
 function MovePresents(){
-    for(var i=0; i<BeeLaga.maxPresents; i++){
-        if(activeIndexes[i]===1){
+    for(var i=0; i<BeeLaga.maxPresents+10; i++){
+        if(activeIndexes[i]==1){
             present[i].y+=BeeLaga.gravity;
             CollisionCheck(i);
             if( present[i].y>game.height+100){
-                SetRandomPos(present[i]);
-                PresentFallCallback();
+                
+                PresentFallCallback(i);
             }
         }
     } 
@@ -392,12 +468,14 @@ function MoveLeft(){
     dude.x -= BeeLaga.velocity;
     dude.animations.play('left');
     leftArrow.alpha=pressedArrowOpacity;
+    EyesFollow();
 }
 
 function MoveRight(){
     dude.x += BeeLaga.velocity;
     dude.animations.play('right');
     rightArrow.alpha=pressedArrowOpacity;
+    EyesFollow();
 }
 
 function CollisionCheck(i){
@@ -423,7 +501,13 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-function PresentFallCallback(){
+function PresentFallCallback(index){
+    if(gameState==processGame){
+           SetRandomPos(present[index]);
+    }
+    else{
+        MoveAway(present[index]);
+    }
     dude.animations.play('joy');
     totalScore+=scoreIncrease;
     scoreText.text=label+totalScore;
