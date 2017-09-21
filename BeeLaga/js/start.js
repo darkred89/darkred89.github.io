@@ -8,6 +8,7 @@ var BeeLaga = {
     tilesize: 100
     
 };
+var nextPresentTimeout;
 
 var activeIndexes = [0,0,0,0,0,0,0,0,0,0,
                      0,0,0,0,0,0,0,0,0,0,
@@ -62,7 +63,7 @@ var firstStart=true;
 var beelineOrange='#ffb612';
 var beelineDarkGrey='#665546';
 
-var debug=false;
+var debug=true;
 
 // Create a new Phaser game object with a single state that has 3 functions
 var game = new Phaser.Game(1000, 500, Phaser.AUTO, 'area', {
@@ -96,8 +97,8 @@ function create() {
     //	Emitters have a center point and a width/height, which extends from their center point to the left/right and up/down
     front_emitter = game.add.emitter(game.world.centerX, -32, 50);
     front_emitter.makeParticles('star');
-    front_emitter.maxParticleScale = 0.8;
-    front_emitter.minParticleScale = 0.1;
+    front_emitter.maxParticleScale = 1;
+    front_emitter.minParticleScale = 0.4;
     front_emitter.setYSpeed(500,500);
     front_emitter.setXSpeed(0,0);
     front_emitter.gravity = 0;
@@ -305,6 +306,10 @@ function StartGame(){
         scoreText.text='';
             
         front_emitter.on=true;
+        
+            if(debug) console.log("GameStarted");
+            
+        nextPresentTimeout=BeeLaga.nextPresentTimeout;
         }
     }
     
@@ -313,17 +318,18 @@ function StartGame(){
 function ProcessGame(){
      //Next Level Logic
     counter++;
-    if(counter>=BeeLaga.nextPresentTimeout+getRandomInt(0,100)){
+    if(counter>=nextPresentTimeout+getRandomInt(0,100)){
          counter=0;
         //SetRandomPos(levelCounter);
        // activeIndexes[levelCounter]=1;
        
         if(levelCounter<BeeLaga.maxPresents){
             //helloText.text=levelCounter;
-            levelCounter++;
+            
              ActivatePresent(levelCounter);
+            levelCounter++;
             if(levelCounter==BeeLaga.maxPresents-1) {
-                BeeLaga.nextPresentTimeout+=BeeLaga.finalWaveTImeout+getRandomInt(-100,200);
+                nextPresentTimeout+=BeeLaga.finalWaveTImeout+getRandomInt(-100,200);
             }
         }
         else{
