@@ -43,6 +43,9 @@ var gameOverText;
 var scoreText;
 var helloBanner;
 var label='GIFTS:'
+var codeText;
+var codeUnderline;
+
 
 var collidePadding=70;
 var gameOver=0;
@@ -184,13 +187,22 @@ function create() {
          font: 'Pixel'
     });
     
-    codeText = game.add.text(0, 180, '', { 
+    codeText = game.add.text(425, 180, '', { 
+        fontSize: '64px', 
+        fill: '#FFFFFF',
+         font: 'Pixel',
+       // boundsAlignH: "center"
+    });
+     //codeText.setTextBounds(0, 0, 1000, 100);
+    
+    
+    codeUnderline = game.add.text(0, 190, '', { 
         fontSize: '64px', 
         fill: '#FFFFFF',
          font: 'Pixel',
         boundsAlignH: "center"
     });
-     codeText.setTextBounds(0, 0, 1000, 100);
+     codeUnderline.setTextBounds(0, 0, 1000, 100);
     
     helloBanner=game.add.text(0, 100, 'Введите 777 для начала игры:', { 
         fontSize: '32px', 
@@ -267,10 +279,14 @@ function update() {
 
 //Blinks with his eyes by timer
 function Blink(){
+    //Check for endGame
+    if(!(eyes.alpha==0 && gameState==endGame)) {
+    
     eyes.alpha=Math.abs(eyes.alpha-1);
     if(eyes.alpha==0){
         blinkCounter=0;
         nextBlinkTime=blinkInterval+getRandomInt(-100,200);
+    }
     }
 }
 //funct eyes to follow the body
@@ -283,28 +299,25 @@ function EyesFollow(){
 //Game Processes
 function StartGame(){
     
-   
-    
     dude.animations.play('up');
     lockDude();
-    
-    
     //if(input.value!='') gameOverText.text=input.value;
+    
+    input.value=input.value.slice(0,3);
     codeText.text=input.value;
+    codeUnderline.text="___";
     
     
     if(codeText.text=='777'){
-        if(Delay(30)){
-            
-            input.value='';
-            input.disabled='disabled';
+        if(Delay(30)){     
+        input.value='';
+        input.disabled='disabled';
         codeText.text='';
+        codeUnderline.text="";
         helloBanner.text='';
         gameState=processGame;
-        StartWithLevel(3);
-            
-        scoreText.text='';
-            
+        StartWithLevel(3);   
+        scoreText.text='';        
         front_emitter.on=true;
         
             if(debug) console.log("GameStarted");
