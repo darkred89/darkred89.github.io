@@ -8,51 +8,75 @@ var BeeLaga = {
     tilesize: 100
     
 };
-var nextPresentTimeout;
 
+//Presents region-----------
+var nextPresentTimeout;
 var activeIndexes = [0,0,0,0,0,0,0,0,0,0,
                      0,0,0,0,0,0,0,0,0,0,
                      0,0,0,0,0,0,0,0,0,0];
 var collidedIndex;
 var present;
 var finalPresents;
+//--------------------------
+
+//Controls------------------
 var keys;
 var seven;
-var dude;
-var eyes;
-var blinkInterval=200;
-var nextBlinkTime=blinkInterval;
-var blinkCounter=0;
+//--------------------------
+
+//UI------------------------
 var leftArrow;
 var rightArrow;
 var unpressedArrowOpacity=0.1;
 var pressedArrowOpacity=0.3;
-
-var emitter;
-var front_emitter;
-
+//TEXTS
 var helloText;
-
-var inputLabel;
-var inputTexbox;
-
-//to get android keyboard
-var input;
-
 var gameOverText;
 var scoreText;
 var helloBanner;
 var label='GIFTS:'
 var codeText;
 var codeUnderline;
+var codeUnderlineBlinkTime=20;
 
+//to get android keyboard
+var input;
+var inputTextbox; //in Html
 
+var button;
+
+//var inputLabel;
+//var inputTexbox;
+
+//--------------------------
+
+//Player--------------------
+var dude;
+var eyes;
+var blinkInterval=200;
+var nextBlinkTime=blinkInterval;
+var blinkCounter=0;
+//--------------------------
+
+//Graphics------------------
+var emitter;
+var front_emitter;
+//--------------------------
+
+//Settings------------------
+var language="ru";
 var collidePadding=70;
 var gameOver=0;
-
 var totalScore=0;
 var scoreIncrease=50;
+//colors
+var beelineOrange='#ffb612';
+var beelineDarkGrey='#665546';
 
+var debug=false;
+//-------------------------
+
+//GameVars-----------------
 //Game state
 var gameState=0;
 //States:
@@ -60,20 +84,20 @@ var startGame=0;
 var processGame=1;
 var endGame=2;
 var finalRound=3;
+
 var firstStart=true;
-
-//colors
-var beelineOrange='#ffb612';
-var beelineDarkGrey='#665546';
-
-var debug=true;
+var focused=false;
+var pixelLoaded=false;
+//----------------------------
 
 // Create a new Phaser game object with a single state that has 3 functions
-var game = new Phaser.Game(1000, 500, Phaser.AUTO, 'area', {
+var gameWidth=1000;
+var game = new Phaser.Game(gameWidth, 500, Phaser.AUTO, 'area', {
     preload: preload,
     create: create,
     update: update
 });
+
 
 //Just testing callbacks
 function onFocus(){
@@ -84,19 +108,51 @@ function onFocus(){
 function preload() {
     // Load our image assets
     //game.load.image('dude', 'img/dude.png');
-    game.load.spritesheet('dude', 'img/dudeanim.png', 100, 100);
+    game.load.crossOrigin = 'anonymous'; // game.load object that needs to be set to the string "anonymous" if you’re loading assets from another server
+    //var resLoadUrl="https://darkred89.github.io/BeeLaga/";
+    
+    game.load.spritesheet('dude','img/dudeanim.png', 100, 100);
     game.load.image('eyes','img/dudeEyes.png');
     
     game.load.image('present','img/present.png');
     game.load.image('leftArrow','img/leftArrow.png');
     game.load.image('rightArrow','img/rightArrow.png');
     
-     game.load.image('star','img/star.png');
+    game.load.image('star','img/star.png');
+    
+    game.load.image('button', 'img/button.png');
 }
 
 // Called after preload
 function create() {
     
+    button = game.add.button(game.world.centerX-195, game.world.centerY, 'button', actionOnClick, this, 2, 1, 0);
+    
+    button.onInputOver.add(over, this);
+    button.onInputOut.add(out, this);
+    button.onInputUp.add(up, this);
+    
+    button.alpha=0;
+    button.scale.setTo(2, 2);
+    
+    //console.log(this.data("lang")); 
+    //var place = eval(("settings").attr('data-lang'));
+    var element = document.getElementById("settings");
+    if(element==null) console.log("Can't find object with settings id");
+    else  {
+        language=element.getAttribute("lang");
+     if(debug) console.log("Language: "+language);   
+    }
+    
+    /* //-old code. Used to get code from inputbox in html
+    inputTextbox=document.getElementById("code");
+    if(inputTextbox==null) console.log("Can't find object with code id");
+    else  {
+        if(debug) console.log(inputTextbox.value);
+    }
+    */
+    
+    //game.stage.backgroundColor = rgb(68, 136, 170);
     //	Emitters have a center point and a width/height, which extends from their center point to the left/right and up/down
     front_emitter = game.add.emitter(game.world.centerX, -32, 50);
     front_emitter.makeParticles('star');
@@ -119,10 +175,10 @@ function create() {
     CreateArrows();
     
     
-    input = document.createElement("input");
-    input.type = "text";
-    input.style.cssText = "position:absolute; left:-1px; top: -1px; width:1px; height:1px; opacity:0; font-size:24px";
-    document.body.appendChild(input);
+   // input = document.createElement("input");
+   // input.type = "text";
+   // input.style.cssText = "position:absolute;  boundsAlignH: center; top: 150px; width:200px; height:40px; opacity:0; font-size:44px ";
+   // document.body.appendChild(input);
     
     // Center game canvas on page
     game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
@@ -136,9 +192,7 @@ function create() {
   // game.scale.refresh();
     // Change background color
     game.stage.backgroundColor = '#181818';
-    
-   
-    
+     
      
     scoreText = game.add.text(700, 5, '', { 
         fontSize: '32px', 
@@ -177,48 +231,24 @@ function create() {
     
     // Add key input to the game
     keys = game.input.keyboard.createCursorKeys();
-    seven= game.input.keyboard.addKey(Phaser.Keyboard.SEVEN);
+    //seven= game.input.keyboard.addKey(Phaser.Keyboard.SEVEN);
     
     
     
-     gameOverText = game.add.text(230, 130, '', { 
-        fontSize: '64px', 
-        fill: '#FFFFFF',
-         font: 'Pixel'
-    });
-    
-    codeText = game.add.text(425, 180, '', { 
-        fontSize: '64px', 
-        fill: '#FFFFFF',
-         font: 'Pixel',
-       // boundsAlignH: "center"
-    });
-     //codeText.setTextBounds(0, 0, 1000, 100);
-    
-    
-    codeUnderline = game.add.text(0, 190, '', { 
-        fontSize: '64px', 
-        fill: '#FFFFFF',
-         font: 'Pixel',
-        boundsAlignH: "center"
-    });
-     codeUnderline.setTextBounds(0, 0, 1000, 100);
-    
-    helloBanner=game.add.text(0, 100, 'Введите 777 для начала игры:', { 
-        fontSize: '32px', 
-        fill: '#FFFFFF',
-         font: 'Pixel',
-         boundsAlignH: "center"        
-    });
-    helloBanner.setTextBounds(0, 0, 1000, 100);
-    
+ 
+    /*
      seven.onDown.add(function(){
         PrintSeven();
     })
+    */
     
+    //SetLabelTexts();
     
-    input.focus();
-    game.input.onDown.add(function(){InputFocus();});
+   // input.focus();
+   // game.input.onDown.add(function(){InputFocus();});
+   
+    game.stage.backgroundColor = 0x000000;
+    
     
 }
 
@@ -243,7 +273,7 @@ var levelCounter= 0;
 
 // Called once every frame, ideally 60 times per second
 function update() {
-    
+   // game.stage.backgroundColor = 0x000000;
     /*
     if(gameOver>0) {
         dude.animations.play('death');
@@ -285,9 +315,50 @@ function Blink(){
     eyes.alpha=Math.abs(eyes.alpha-1);
     if(eyes.alpha==0){
         blinkCounter=0;
-        nextBlinkTime=blinkInterval+getRandomInt(-100,200);
+        nextBlinkTime=blinkInterval+getRandomInt(-150,200);
     }
     }
+}
+
+var codeUnderlineCounter=0;
+function BlinkInputLabel(){
+    /*
+    codeUnderlineCounter++;
+    if(codeUnderlineCounter<codeUnderlineBlinkTime) return;
+    
+    codeUnderlineCounter=0;
+    
+    switch (codeText.text.length){
+        case 0:
+            if(codeUnderline.text=='___'){
+                codeUnderline.text="-__";
+            }
+            else{
+                codeUnderline.text="___";
+            }
+           
+            break;
+        case 1:
+            if(codeUnderline.text=='___'){
+                codeUnderline.text="_-_";
+            }
+            else{
+                codeUnderline.text="___";
+            }
+            break;
+         case 2:
+            if(codeUnderline.text=='___'){
+                codeUnderline.text="__-";
+            }
+            else{
+                codeUnderline.text="___";
+            }
+            break;
+        default:
+            codeUnderline.text="___";
+            break;
+    }
+    */
 }
 //funct eyes to follow the body
 //TODO make them a GROUP
@@ -296,25 +367,106 @@ function EyesFollow(){
     eyes.y=dude.y;
 }
 
+//update texts
+function SetLabelTexts(){
+    
+        gameOverText = game.add.text(0, 130, '', { 
+        fontSize: '64px', 
+        fill: '#FFFFFF',
+         font: 'Pixel',
+         align: "center",
+        boundsAlignH: "center"
+    });
+    gameOverText.alpha=0;
+    if(language=="kg"){
+        
+    }
+    
+    codeText = game.add.text(425, 240, '', { 
+        fontSize: '84px', 
+        fill: '#FFFFFF',
+         font: 'Pixel',
+       // boundsAlignH: "center"
+    });
+     //codeText.setTextBounds(0, 0, 1000, 100);
+    
+    
+    codeUnderline = game.add.text(0, 190, '', { 
+        fontSize: '64px', 
+        fill: '#FFFFFF',
+         font: 'Pixel',
+        boundsAlignH: "center"
+    });
+     
+    
+    helloBanner=game.add.text(0, 100, '', { 
+        fontSize: '32px', 
+        fill: '#FFFFFF',
+        font: 'Pixel',
+        boundsAlignH: "center",
+        align: "center"
+    });
+   
+    
+    if(language=='kg'){
+        helloBanner.text='Белектен кача албайсын!\n777ни тер';
+        gameOverText.text='Белектен кача\nалбайсын!';
+    }
+    else{
+        gameOverText.text='От подарка\nне убежишь!';
+        helloBanner.text='От подарка не убежишь!\nНажмите 777';
+    }
+    //codeUnderline.text="___";
+    helloBanner.cssFont='52px Pixel';
+    gameOverText.cssFont='84px Pixel';
+    
+    codeUnderline.setTextBounds(0, 0, gameWidth, 100);
+    helloBanner.setTextBounds(0, 0, gameWidth, 100);
+    gameOverText.setTextBounds(0, 0, gameWidth, 100);
+    
+    firstStart=false;
+}
 //Game Processes
 function StartGame(){
-    
-    dude.animations.play('up');
     lockDude();
+     dude.animations.play('up');
+    
+    if(firstStart && Delay(10) && pixelLoaded){
+        SetLabelTexts();
+         button.alpha=1;
+    }
+    //Update texts
+   //SetLabelTexts();
+    if(!firstStart){
+    //inputTextbox.disabled=false;
+    
+    
+   
+    
     //if(input.value!='') gameOverText.text=input.value;
     
-    input.value=input.value.slice(0,3);
-    codeText.text=input.value;
-    codeUnderline.text="___";
+   // input.value=input.value.slice(0,3);
+    //input.value=inputTextbox.value.slice(0,3);
+    //codeText.text=input.value;
+    if(focused){
+           InputFocus();
+       
+    }
     
+    BlinkInputLabel(); 
     
     if(codeText.text=='777'){
-        if(Delay(30)){     
-        input.value='';
-        input.disabled='disabled';
+       
+        //focused=false;
+        if(Delay(30)){ 
+        //inputTextbox.value='';
+        //inputTextbox.disabled=true;
+        //input.value='';
+        //input.disabled='disabled';
         codeText.text='';
         codeUnderline.text="";
-        helloBanner.text='';
+        //helloBanner.text='';
+        helloBanner.alpha=0;
         gameState=processGame;
         StartWithLevel(3);   
         scoreText.text='';        
@@ -325,7 +477,7 @@ function StartGame(){
         nextPresentTimeout=BeeLaga.nextPresentTimeout;
         }
     }
-    
+    }
 }
 
 function ProcessGame(){
@@ -351,10 +503,11 @@ function ProcessGame(){
             RemoveUpperPresents();
         }
     }
+    
     rightArrow.alpha=unpressedArrowOpacity;
     leftArrow.alpha=unpressedArrowOpacity;
-    MovePresents();
     
+    MovePresents();   
     GetKeyboarControls();
     GetTouchControl();
     lockDude();
@@ -377,11 +530,13 @@ function EndGame(){
     
     if(AnimateGameOver())
     {
-           
-        gameOver=0;       
         gameState=startGame;
-        helloBanner.text='Введите 777 для начала игры:';
-        input.disabled='';
+        gameOver=0;       
+       
+        //codeUnderline.text="___";
+        //helloBanner.text='Введите 777 для начала игры:';
+        helloBanner.alpha=1;
+        //input.disabled='';
         totalScore=0;
         
         for(var i=0; i<BeeLaga.maxPresents+10; i++){
@@ -391,9 +546,16 @@ function EndGame(){
         }
         firstStart=false;    
         levelCounter=0;
-        gameOverText.text='';
+        //gameOverText.text='';
+        gameOverText.alpha=0;
         //input.focus();
+        focused=false;
+        button.alpha=1;
         Focus();
+        
+      
+       
+        
     }
 }
 
@@ -418,11 +580,16 @@ function Focus(){
      var element = document.getElementById("focusId");
         alignWithTop = true;
         //helloBanner.text=element.value;
-        element.scrollIntoView(alignWithTop);
+        if(element==null) console.log("Can't find element with focusId id");
+        else element.scrollIntoView(alignWithTop);
+    
 }
+
 //For smartphone input, we had to place inputbox, make it transparent
+//Now we turned it off
 function InputFocus(){
-    input.focus();
+    //focused=true;
+   // input.focus();
 }
 
 //Old function, was  before inputbox
@@ -484,7 +651,6 @@ function lockDude(){
     } 
     EyesFollow();
 }
-
 // Present stuff---------
 function ActivatePresent(i){
     SetRandomPos(present[i]);
@@ -562,7 +728,8 @@ function CollisionCheck(i){
 //Game mechanics
 function GameOver(){
     gameOver=1;
-    gameOverText.text="ОТ ПОДАРКА НЕ\r\nУБЕЖИШЬ!";
+    //gameOverText.text="ОТ ПОДАРКА НЕ\r\nУБЕЖИШЬ!";
+    gameOverText.alpha=1;
     dude.animations.play('death');
     
     front_emitter.on=false;
@@ -617,7 +784,7 @@ function Delay(ticks){
 var animCounter=0;
 function AnimateGameOver(){
     animCounter++;
-    
+    EyesFollow();
     if(animCounter<200){
         var yVel=10-animCounter/5;
         dude.y-=yVel;
@@ -629,4 +796,86 @@ function AnimateGameOver(){
         animCounter=0;
         return true;
     }
+}
+
+function waitForWebfonts(fonts, callback) {
+    var loadedFonts = 0;
+    for(var i = 0, l = fonts.length; i < l; ++i) {
+        (function(font) {
+            var node = document.createElement('span');
+            // Characters that vary significantly among different fonts
+            node.innerHTML = 'giItT1WQy@!-/#';
+            // Visible - so we can measure it - but not on the screen
+            node.style.position      = 'absolute';
+            node.style.left          = '-10000px';
+            node.style.top           = '-10000px';
+            // Large font size makes even subtle changes obvious
+            node.style.fontSize      = '300px';
+            // Reset any font properties
+            node.style.fontFamily    = 'sans-serif';
+            node.style.fontVariant   = 'normal';
+            node.style.fontStyle     = 'normal';
+            node.style.fontWeight    = 'normal';
+            node.style.letterSpacing = '0';
+            document.body.appendChild(node);
+
+            // Remember width with no applied web font
+            var width = node.offsetWidth;
+
+            node.style.fontFamily = font;
+
+            var interval;
+            function checkFont() {
+                // Compare current width with original width
+                if(node && node.offsetWidth != width) {
+                    ++loadedFonts;
+                    node.parentNode.removeChild(node);
+                    node = null;
+                }
+
+                // If all fonts have been loaded
+                if(loadedFonts >= fonts.length) {
+                    if(interval) {
+                        clearInterval(interval);
+                    }
+                    if(loadedFonts == fonts.length) {
+                        callback();
+                        return true;
+                    }
+                }
+            };
+
+            if(!checkFont()) {
+                interval = setInterval(checkFont, 50);
+            }
+        })(fonts[i]);
+    }
+};
+
+waitForWebfonts(['Pixel'], function() {
+    // Will be called as soon as ALL specified fonts are available
+    console.log("Pixel has been loaded");
+    pixelLoaded=true;
+});
+
+function actionOnClick () {
+
+    if(debug) console.log("Clicked");
+    
+    if(!firstStart && gameState==startGame){
+        codeText.text='777';
+        button.alpha=0;
+    }
+}
+
+function up() {
+  if(debug) console.log('button up', arguments);
+}
+
+function over() {
+   if(debug) console.log('button over');
+}
+
+function out() {
+ if(debug)  console.log('button out');
 }

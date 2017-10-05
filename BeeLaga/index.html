@@ -2,6 +2,8 @@
 <html>
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=0">
+
     <title>BeeLaga</title>
     <style>
         body {
@@ -23,6 +25,7 @@
     border: 2px solid black;  /* Параметры рамки */
     padding-right: 40px; /* Поля вокруг текста */
     padding-left: 40px; /* Поля вокруг текста */
+       
    }
     
     </style>
@@ -30,10 +33,17 @@
 </head>
 <body>
     <div class="layer">
+        <div style="overflow:auto;-webkit-overflow-scrolling:touch">
     <div id="area"></div>
     </div>
-    
+        </div>
+    <div id="settings" lang="kg"></div>
     <script src="js/start.js"></script>
+   
+    <div align="center">
+         <p><b>Введите код</b></p>
+        <!--<input maxlength="3" type="text" size="64" id="code" value="" style="width: 122px; height: 64px; font-size:64px;"> -->
+    </div>
     <h1 align="center" style="color:#ffffff; font-family: Pixel;">От подарка не убежишь!</h1>
     <div  style="border: 2px solid black;">
     <p align="center" >Используйте стрелки на клавиатуре для управления</p>
