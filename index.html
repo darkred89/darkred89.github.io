@@ -1,15 +1,64 @@
-<!DOCTYPE html>
-<html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity WebGL Player | BeeLaga</title>
-    <script src="Build/UnityLoader.js"></script>
-    <script>
-      var gameInstance = UnityLoader.instantiate("gameContainer", "Build/release.json");
-    </script>
-  </head>
-  <body>
-    <div id="gameContainer" style="width: 600px; height: 300px; margin: auto"></div>
-  </body>
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=0">
+
+    <title>BeeLaga</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #333333;
+        }
+    @font-face {
+    font-family: Pixel; /* Имя шрифта */
+    src: url(font/9303.otf); /* Путь к файлу со шрифтом */
+    }
+    P {
+    font-family: Pixel;
+   }
+      
+    
+   .layer {
+    background: #333333; /* Цвет фона */
+    border: 2px solid black;  /* Параметры рамки */
+    padding-right: 40px; /* Поля вокруг текста */
+    padding-left: 40px; /* Поля вокруг текста */
+       
+   }
+    
+    </style>
+    <script src="js/phaser.min.js"></script>
+</head>
+<body>
+    <div class="layer">
+        <div style="overflow:auto;-webkit-overflow-scrolling:touch">
+    <div id="area"></div>
+    </div>
+        </div>
+    <div id="settings" lang="kg"></div>
+    <script src="js/start.js"></script>
+   
+    <div align="center">
+         <p><b>Введите код</b></p>
+        <!--<input maxlength="3" type="text" size="64" id="code" value="" style="width: 122px; height: 64px; font-size:64px;"> -->
+    </div>
+    <h1 align="center" style="color:#ffffff; font-family: Pixel;">От подарка не убежишь!</h1>
+    <div  style="border: 2px solid black;">
+    <p align="center" >Используйте стрелки на клавиатуре для управления</p>
+    <p align="center" >Используйте края поля для управления на мобильном устройстве</p>
+    <p align="center" >Для появления клавиатуры на мобильном устройстве - кликните по полю.</p>
+    </div>
+    
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisis leo nec tellus placerat mollis. In dictum dolor tellus, vel fringilla arcu pharetra et. Donec aliquam bibendum leo, nec consequat tellus mollis ac. Proin non dolor id purus elementum sodales eget nec nisl. Curabitur sed sagittis odio. Cras aliquam quis erat nec laoreet. Pellentesque suscipit justo et est euismod, ut dictum odio feugiat. Phasellus enim magna, varius vitae vestibulum et, pulvinar in nibh. Phasellus imperdiet nisl diam, at egestas arcu lobortis et. Proin malesuada ultricies ex vitae vehicula. Donec egestas, urna et faucibus aliquet, turpis justo ornare ex, sit amet faucibus mi mi quis velit. Etiam egestas mi in ipsum lobortis sagittis.</p>
+
+ <p>Aenean tempor ultricies vulputate. Nam eget convallis lacus. Duis eget eleifend mi. Aliquam erat volutpat. Nullam pulvinar malesuada ligula. Donec eget leo est. Ut sodales velit quis augue efficitur malesuada. Aenean sed libero a sem hendrerit gravida. Nunc at mi id sapien porta bibendum sit amet vel metus. Etiam vitae leo porta, eleifend metus et, vulputate mauris. Vestibulum faucibus tincidunt massa, vitae blandit neque. Curabitur convallis nunc purus, eu efficitur purus aliquet ut. Maecenas id nisi vel turpis congue efficitur ut id lacus. Nunc convallis metus eu tempus congue.</p>
+
+ <p>Integer a dui odio. Curabitur accumsan, leo vel maximus egestas, nulla ex porta erat, vitae dapibus lorem erat a orci. Pellentesque interdum fringilla ex, eu laoreet tortor. Pellentesque volutpat, magna lacinia laoreet tempus, lorem tortor varius est, dapibus pulvinar massa quam vitae lacus. Pellentesque volutpat lacus eget massa auctor, a pharetra elit venenatis. Cras molestie tortor augue, eget commodo sapien ullamcorper sed. Aliquam condimentum felis dignissim, congue mi quis, elementum orci.</p>
+
+ <p>Maecenas gravida tellus eros, nec finibus nisi ultricies vel. Nunc sed tincidunt nibh. Integer tempus nibh vel arcu egestas, id gravida ligula tempor. Curabitur malesuada vehicula diam. Nulla dictum tortor sit amet nulla bibendum, quis cursus dolor imperdiet. Nunc ac felis porta, condimentum erat in, pharetra diam. Nam id enim et libero pretium semper non nec sapien. Duis sit amet augue auctor, pharetra urna quis, pulvinar nunc. Donec facilisis eros orci, a efficitur lorem pellentesque quis. Nulla sodales eget sem quis ultrices. Nam in eleifend turpis. Praesent laoreet elementum metus gravida placerat. Fusce non pellentesque dui. Nullam consectetur ut sapien vitae vestibulum. Cras rhoncus bibendum lacus, et finibus elit rutrum a. Aenean in dapibus neque, in eleifend est.</p>
+<div id="focusId"><p>ScrollPOint</p></div>
+ <p>Nullam id tempus quam, sit amet ullamcorper neque. Vestibulum rhoncus, ipsum nec vestibulum pellentesque, velit arcu elementum metus, sit amet maximus erat magna non urna. Pellentesque condimentum augue ac metus bibendum tincidunt. Phasellus nisi erat, bibendum at diam nec, ullamcorper iaculis erat. Nam neque lacus, semper nec quam at, lobortis luctus urna. Fusce tempus ac mi nec tempus. Curabitur lacinia dignissim sodales. Aenean at malesuada neque. Integer elit enim, sagittis eu fermentum id, ullamcorper nec augue. Nam at pellentesque sem, in luctus risus. Proin varius at nunc a sagittis. Nullam at elit sed quam pulvinar elementum. Curabitur sollicitudin consectetur tincidunt. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
+</body>
 </html>
